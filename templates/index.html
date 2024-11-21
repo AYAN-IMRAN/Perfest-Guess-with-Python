@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .result-message {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #6200ea;
+            border-color: #6200ea;
+        }
+        .btn-primary:hover {
+            background-color: #3700b3;
+            border-color: #3700b3;
+        }
+        .input-group-text {
+            background-color: #6200ea;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center text-white">Guess the Number Game 🎮</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="number" id="userGuess" class="form-control" placeholder="Enter your guess (1-50)" min="1" max="50">
+                    <button class="btn btn-primary" id="submitGuess">Guess</button>
+                </div>
+                <div id="result" class="result-message text-center"></div>
+                <div id="attempts" class="text-center mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let gameOver = false;  // Track if the game is over
+
+            $("#submitGuess").click(function() {
+                if (gameOver) {
+                    alert("The game is over! Reload the page to play again.");
+                    return;  // Stop any further guesses if the game is over
+                }
+
+                const userGuess = $("#userGuess").val();
+                if (userGuess === "") {
+                    alert("Please enter a number!");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/guess",
+                    data: { guess: userGuess },
+                    success: function(response) {
+                        $("#result").text(response.message);  // Show the message (congratulations or error)
+                        
+                        if (response.status === "success") {
+                            $("#attempts").text(``);
+                            gameOver = true;  // Mark game as over
+                            $("#submitGuess").prop('disabled', true);  // Disable the guess button
+                        } else {
+                            $("#attempts").text(`Attempts: ${response.guesses}`);  // Show the number of attempts
+                        }
+
+                        // Clear the input field after the guess
+                        $("#userGuess").val('');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
